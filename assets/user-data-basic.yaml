@@ -1,0 +1,33 @@
+#cloud-config
+# 基础系统初始化配置
+hostname: cloud-vm
+manage_etc_hosts: true
+
+# 创建用户并设置密码
+users:
+  - name: admin
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: false
+    # 密码为：Admin@123，使用openssl passwd -6生成
+    passwd: $6$rounds=656000$B.ZuT7.5Pq/z5V4D$XcN6hLJ6c5.5U5Yv5B5O5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8...（你的公钥）
+
+# 更新软件包缓存并安装常用工具
+package_update: true
+package_upgrade: true
+packages:
+  - curl
+  - wget
+  - vim
+  - net-tools
+
+# 运行自定义命令
+runcmd:
+  - [mkdir, -p, /opt/cloud-init]
+  - [sh, -c, "echo 'Cloud-init completed at $(date)' > /opt/cloud-init/init.log"]
+  - [systemctl, restart, sshd]   # 重启SSH服务使新用户生效
+
+# 输出日志，便于调试
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
